@@ -51,17 +51,38 @@ If you run `:3Multiterm` and do not have a floating terminal with tag `3` create
 
 If your tag `3` floating terminal is in the background, run `:3Multiterm` will put the session into foreground. You could then run `:Multiterm` to close the window and put it into background again.
 
+
 ## Commands & Mappings
 
 A single command is provided:
 
-```viml
+```vim
 :[count]Multiterm[!] [cmd]
 ```
 
-- `[count]` could be a number between 1 and 9 and is the tag of the floating window that you want to activate. If it is not specified, the current active floating terminal session will be closed, or the tag `1` session will be activated in the condition that there is no active session.
-- `[!]` forces the terminal window not to close when the terminal job exits. Otherwise, in NeoVim the window will be closed as immediately as the job exits with a zero exit code, and in Vim the window will be closed when the job is finished.
-- `[cmd]` is the optional command to run. if not specified, the current `shell` option value will be used.
+* `[count]` could be a number between 1 and 9 and is the tag of the floating window that you want to activate. If it is not specified, the current active floating terminal session will be closed, or the tag `1` session will be activated in the condition that there is no active session.
+* `[!]` forces the terminal window not to close when the terminal job exits with a **zero** exit code. If not passed, the window will stay open only if the job exits with a **non-zero** code, allowing you to read the error. In that case, pressing `<Enter>` will close the buffer manually.
+* `[cmd]` is the optional command to run. if not specified, the current `shell` option value will be used.
+
+Additional commands:
+
+```vim
+:MultitermKill [id]
+```
+
+* Kills the terminal session and removes the buffer with the given tag `[id]`.
+
+```vim
+:MultitermKillCurrent
+```
+
+* Kills and removes the currently active terminal session and buffer.
+
+```vim
+:MultitermList
+```
+
+* Opens a popup list of active terminal instances. Use `<Enter>` to open a selected terminal, and press `d` to delete it directly from the list.
 
 Mappings are provided to smooth the operation of toggling floating terminals and are the **SUGGESTED** way to use instead of the command. Using these mappings are just like run `:Multiterm` without any additional argument.
 
@@ -75,9 +96,15 @@ vim.keymap.set("n", "<leader><F12>", "<Plug>(MultitermList)"),
 
 Now you could press `<F12>` to toggle the tag `1` floating terminal instance or close the current active floating terminal window that your cursor is in. And press `3<F12>` to activate the tag `3` instance, etc.
 
-The `<Plug>(MultitermList)` keymap provides a way to see all opened multiterm windows conveniently. It opens a popup window with a list of all the active multiterm windows where you can select and open the one you need.
+The `<Plug>(MultitermList)` keymap provides a way to see all opened multiterm windows conveniently. It opens a popup window with a list of all the active multiterm windows where you can select and open the one you need. When selecting an entry in this list, you can press `d` to kill and remove it.
 
 **NOTE** in terminal mode it is impossible to press a number as the tag, but you can still use `<F12>` to close the current terminal window which your cursor is in without specifying its tag.
+
+When a terminal buffer is open, a **tabline** will be shown in the top-right of the floating window, indicating the currently active terminal. You can switch between terminals with:
+
+* `<C-1>` through `<C-9>` – Directly switch to a terminal with the matching tag
+* `<C-h>` / `<C-l>` – Cycle through terminals (left/right)
+* `<C-Left>` / `<C-Right>` – Also supported for cycling between instances
 
 ## Configuration
 
@@ -95,6 +122,9 @@ require("multiterm").setup({
     backdrop_bg = 'Black',
     backdrop_transparency = 60,
     fullscreen = false,
+	show_tab = true,
+	tabline_hl_cur = "PmenuSel", 
+	tabline_hl_other = "Pmenu", 
 )}
 ```
 

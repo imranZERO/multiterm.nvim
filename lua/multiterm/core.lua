@@ -27,11 +27,6 @@ local default_opts = {
 	show_tab = true,
 	tabline_hl_cur = "PmenuSel", -- highlight group for active tag
 	tabline_hl_other = "Pmenu", -- for inactive
-	keymaps = {
-		next = "<C-Right>", -- jump to next tag
-		prev = "<C-Left>", -- jump to prev
-		use_ctrl = true, -- map <C-1> <C-9>
-	},
 }
 
 local opts = {}
@@ -415,7 +410,7 @@ end
 
 -- ensure tabline window exists
 local function ensure_tabline()
-	if not opts.show_tabline then
+	if not opts.show_tab then
 		return
 	end
 
@@ -459,7 +454,7 @@ local function ensure_tabline()
 end
 
 function M.update_tab(active_tag)
-	if not opts.show_tabline then
+	if not opts.show_tab then
 		return
 	end
 

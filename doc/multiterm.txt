@@ -67,7 +67,8 @@ argument.
 <Plug>(MultitermList)                                  *<Plug>(MultitermList)*
 The |<Plug>MultitermList| keymap opens a popup window with a list of the active
 mulititerm windows. You can navigate this list with standard vim keys and
-pressing |<CR>| will open the corresponding terminal window.
+pressing |<CR>| will open the corresponding terminal window. Additionally, you
+can press d to delete the selected terminal and its buffer directly from the list.
 
 Add the following into your config file to toggle Multiterm floating terminal
 windows with <F12>:
@@ -84,6 +85,19 @@ for all active terminals.
 These mappings have most of the functionality of the |:Multiterm| command. For
 example, here you can open number 3 of the 1-9 tags by pressing `3<F12>`, and
 switch to the first terminal window with `1<F12>`.
+When terminal windows are active, a tab bar is shown in the top-right corner
+to indicate the current terminal session. You can switch between terminals
+with:
+
+    <C-1> through <C-9> – to activate a terminal by its tag
+
+    <C-h> / <C-l> – to cycle between terminals left and right
+
+    <C-Left> / <C-Right> – alternative keys for cycling
+
+If the current terminal buffer is already visible and :Multiterm is invoked
+again with a new [cmd], the existing terminal will be reused and its content
+replaced with the new command.
 
 ==============================================================================
 3. Configuration                                     *multiterm-configuration*
@@ -103,6 +117,9 @@ You can configure multiterm with Lua via require("multiterm").setup(opts).
         backdrop_bg = 'Black',
         backdrop_transparency = 60,
         fullscreen = false,
+	show_tab = true,
+	tabline_hl_cur = "PmenuSel", 
+	tabline_hl_other = "Pmenu", 
 
         -- any keymaps you want
     )}
