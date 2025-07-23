@@ -143,7 +143,42 @@ function M.toggle_float_term(tag, no_close, tmode, cmd)
 		vim.api.nvim_win_set_var(term_wins[tag], "_multiterm_term_tag", tag)
 
 		M.update_tab(tag)
-        vim.cmd("startinsert")
+		vim.cmd("startinsert")
+
+		local buf = term_bufs[tag]
+
+		-- next / prev tabs
+		vim.keymap.set({ "n", "t", "i", "v" }, "<C-h>", M.prev_term, {
+			silent = true,
+			buffer = buf,
+		})
+		vim.keymap.set({ "n", "t", "i", "v" }, "<C-l>", M.next_term, {
+			silent = true,
+			buffer = buf,
+		})
+
+		-- ctrl numbers to toggle terminals
+		if opts.keymaps and opts.keymaps.use_ctrl_numbers then
+			for num = 1, 9 do
+				vim.keymap.set({ "n", "t", "i", "v" }, "<C-" .. num .. ">", function()
+					M.toggle_float_term(num, false, 0, "")
+				end, { silent = true, buffer = buf })
+			end
+		end
+
+		-- custom keymaps for next/prev
+		if opts.keymaps and opts.keymaps.next then
+			vim.keymap.set({ "n", "t", "i", "v" }, opts.keymaps.next, M.next_term, {
+				silent = true,
+				buffer = buf,
+			})
+		end
+		if opts.keymaps and opts.keymaps.prev then
+			vim.keymap.set({ "n", "t", "i", "v" }, opts.keymaps.prev, M.prev_term, {
+				silent = true,
+				buffer = buf,
+			})
+		end
 
 		vim.api.nvim_create_autocmd("WinLeave", {
 			buffer = term_bufs[tag],
@@ -515,7 +550,7 @@ function M.update_tab(active_tag)
 			local len = #text
 			local hl = (t == active_tag) and opts.tabline_hl_cur or opts.tabline_hl_other
 			vim.api.nvim_buf_add_highlight(tab_buf, -1, hl, 0, col, col + len)
-			col = col + len + 1 
+			col = col + len + 1
 		end
 	end
 end
