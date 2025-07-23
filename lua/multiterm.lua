@@ -52,7 +52,27 @@ function M.setup(user_opts)
 		{ silent = true }
 	)
 
-	-- List (with “d” to delete)
+	-- Keymaps for Tab navigation
+	if user_opts.keymaps then
+		local km = user_opts.keymaps
+		if km.next then
+			vim.keymap.set({ "n", "t", "i", "v" }, km.next, core.next_term, { silent = true })
+		end
+		if km.prev then
+			vim.keymap.set({ "n", "t", "i", "v" }, km.prev, core.prev_term, { silent = true })
+		end
+		if km.use_ctrl_numbers then
+			for t = 1, 9 do
+				vim.keymap.set({ "n", "t", "i", "v" }, "<C-" .. t .. ">", function()
+					core.toggle_float_term(t, false, 0, "")
+				end, { silent = true })
+			end
+		end
+	end
+	vim.keymap.set({ "n", "t", "i", "v" }, "<C-h>", core.prev_term, { silent = true })
+	vim.keymap.set({ "n", "t", "i", "v" }, "<C-l>", core.next_term, { silent = true })
+
+	-- List. Press d to delete
 	vim.keymap.set("n", "<Plug>(MultitermList)", require("multiterm.core").list_terminals)
 end
 

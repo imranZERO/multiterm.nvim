@@ -20,14 +20,23 @@ local default_opts = {
 	border = "rounded",
 	term_hl = "Normal",
 	border_hl = "FloatBorder",
-	show_term_tag = true,
 	show_backdrop = true,
 	backdrop_bg = "Black",
 	backdrop_transparency = 60,
 	fullscreen = false,
+	show_tab = true,
+	tabline_hl_cur = "PmenuSel", -- highlight group for active tag
+	tabline_hl_other = "Pmenu", -- for inactive
+	keymaps = {
+		next = "<C-Right>", -- jump to next tag
+		prev = "<C-Left>", -- jump to prev
+		use_ctrl = true, -- map <C-1> <C-9>
+	},
 }
 
 local opts = {}
+
+local tab_buf, tab_win
 
 local term_buf_active_count = 0
 local term_buf_active_counts = {}
@@ -36,7 +45,6 @@ local term_wins = {}
 local term_last_wins = {}
 local term_tmodes = {}
 local backdrop_wins = {}
-local tag_bufs = {}
 local tag_wins = {}
 
 for i = 0, 9 do
@@ -63,53 +71,6 @@ local function get_term_tag(tag)
 	else
 		return tag
 	end
-end
-
-local function create_tag_overlay(tag, win_opts)
-	if not opts.show_term_tag then
-		return nil, nil
-	end
-
-	local label = "[" .. tag .. "]"
-	if not tag_bufs[tag] or not vim.api.nvim_buf_is_valid(tag_bufs[tag]) then
-		tag_bufs[tag] = vim.api.nvim_create_buf(false, true)
-	end
-
-	vim.api.nvim_buf_set_lines(tag_bufs[tag], 0, -1, false, { label })
-	vim.api.nvim_buf_set_option(tag_bufs[tag], "modifiable", false)
-	vim.api.nvim_buf_set_option(tag_bufs[tag], "bufhidden", "wipe")
-
-	local width = #label
-	local height = 1
-	local row = (win_opts.row or 0)
-	local col = (win_opts.col or 0) + (win_opts.width or 0) - width - 1
-	if col < 0 then
-		col = 0
-	end
-
-	local win_opts_overlay = {
-		relative = "editor",
-		row = row,
-		col = col,
-		width = width,
-		height = height,
-		style = "minimal",
-		focusable = false,
-		noautocmd = true,
-		border = nil,
-		zindex = 300,
-	}
-
-	if tag_wins[tag] and vim.api.nvim_win_is_valid(tag_wins[tag]) then
-		vim.api.nvim_win_set_buf(tag_wins[tag], tag_bufs[tag])
-		vim.api.nvim_win_set_config(tag_wins[tag], win_opts_overlay)
-		return tag_bufs[tag], tag_wins[tag]
-	end
-
-	local win = vim.api.nvim_open_win(tag_bufs[tag], false, win_opts_overlay)
-	vim.api.nvim_win_set_option(win, "winhighlight", "NormalFloat:" .. opts.term_hl)
-	tag_wins[tag] = win
-	return tag_bufs[tag], win
 end
 
 local function create_backdrop(tag)
@@ -186,17 +147,12 @@ function M.toggle_float_term(tag, no_close, tmode, cmd)
 		vim.api.nvim_win_set_option(term_wins[tag], "winhighlight", "NormalFloat:" .. opts.term_hl)
 		vim.api.nvim_win_set_var(term_wins[tag], "_multiterm_term_tag", tag)
 
-		-- Create or update tag overlay
-		local _, tag_win = create_tag_overlay(tag, win_opts)
+		M.update_tab(tag)
 
 		vim.api.nvim_create_autocmd("WinLeave", {
 			buffer = term_bufs[tag],
 			once = true,
 			callback = function()
-				if tag_win then
-					pcall(vim.api.nvim_win_close, tag_win, true)
-					tag_wins[tag], tag_bufs[tag] = nil, nil
-				end
 				if term_wins[tag] then
 					pcall(vim.api.nvim_win_close, term_wins[tag], true)
 					term_wins[tag] = nil
@@ -205,6 +161,10 @@ function M.toggle_float_term(tag, no_close, tmode, cmd)
 					pcall(vim.api.nvim_buf_delete, backdrop_buf, { force = true })
 					pcall(vim.api.nvim_win_close, backdrop_win, true)
 					backdrop_wins[tag] = nil
+				end
+				if tab_win and vim.api.nvim_win_is_valid(tab_win) then
+					pcall(vim.api.nvim_win_close, tab_win, true)
+					tab_buf, tab_win = nil, nil
 				end
 				term_tmodes[tag] = 0
 			end,
@@ -232,16 +192,16 @@ function M.toggle_float_term(tag, no_close, tmode, cmd)
 	else
 		pcall(vim.api.nvim_win_close, term_wins[tag], true)
 		term_wins[tag] = nil
-		if tag_wins[tag] then
-			pcall(vim.api.nvim_win_close, tag_wins[tag], true)
-			tag_wins[tag], tag_bufs[tag] = nil, nil
-		end
 		if backdrop_wins[tag] then
 			pcall(vim.api.nvim_win_close, backdrop_wins[tag], true)
 			backdrop_wins[tag] = nil
 		end
 		if term_last_wins[tag] and vim.api.nvim_win_is_valid(term_last_wins[tag]) then
 			vim.api.nvim_set_current_win(term_last_wins[tag])
+		end
+		if tab_win and vim.api.nvim_win_is_valid(tab_win) then
+			pcall(vim.api.nvim_win_close, tab_win, true)
+			tab_buf, tab_win = nil, nil
 		end
 		term_tmodes[tag] = tmode
 	end
@@ -327,7 +287,7 @@ function M.list_terminals()
 		silent = true,
 	})
 
-    -- delete terminal by pressing d
+	-- delete terminal by pressing d
 	vim.keymap.set("n", "d", function()
 		local line = vim.api.nvim_get_current_line()
 		local tag = tonumber(line:match("Term (%d+)"))
@@ -356,7 +316,7 @@ function M.list_terminals()
 			vim.api.nvim_win_set_cursor(win, { ln, 0 })
 		end
 
-		-- force a redraw 
+		-- force a redraw
 		vim.cmd("redraw")
 
 		if #new == 0 then
@@ -409,9 +369,12 @@ function M._do_kill(tag)
 	if vim.api.nvim_buf_is_valid(term_bufs[tag]) then
 		vim.api.nvim_buf_delete(term_bufs[tag], { force = true })
 	end
+	if tab_win and vim.api.nvim_win_is_valid(tab_win) then
+		pcall(vim.api.nvim_win_close, tab_win, true)
+		tab_buf, tab_win = nil, nil
+	end
 	term_bufs[tag] = nil
 	term_wins[tag] = nil
-	tag_bufs[tag] = nil
 	tag_wins[tag] = nil
 	backdrop_wins[tag] = nil
 	term_tmodes[tag] = nil
@@ -437,6 +400,176 @@ function M.kill(tag)
 		return
 	end
 	M._do_kill(tag)
+end
+
+-- Render the tab bar
+local function render_tab()
+	local bits = {}
+	for t = 1, 9 do
+		if term_bufs[t] and vim.api.nvim_buf_is_valid(term_bufs[t]) then
+			table.insert(bits, string.format("[%d]", t))
+		end
+	end
+	return table.concat(bits, " ")
+end
+
+-- ensure tabline window exists
+local function ensure_tabline()
+	if not opts.show_tabline then
+		return
+	end
+
+	local active_term_win = nil
+	for t = 1, 9 do
+		if term_wins[t] and vim.api.nvim_win_is_valid(term_wins[t]) then
+			active_term_win = term_wins[t]
+			break
+		end
+	end
+
+	if not active_term_win then
+		return
+	end
+
+	if tab_buf and vim.api.nvim_buf_is_valid(tab_buf) then
+		return
+	end
+
+	tab_buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_buf_set_option(tab_buf, "bufhidden", "wipe")
+
+	local term_config = vim.api.nvim_win_get_config(active_term_win)
+	local line = render_tab(0)
+	local tabline_width = #line
+
+	tab_win = vim.api.nvim_open_win(tab_buf, false, {
+		relative = "editor",
+		anchor = "NE",
+		width = tabline_width,
+		height = 1,
+		row = term_config.row,
+		col = term_config.col + term_config.width - 2,
+		style = "minimal",
+		border = nil,
+		focusable = false,
+		zindex = 60,
+	})
+
+	vim.api.nvim_win_set_option(tab_win, "winhighlight", "Normal:" .. opts.border_hl)
+end
+
+function M.update_tab(active_tag)
+	if not opts.show_tabline then
+		return
+	end
+
+	local any_visible = false
+	for t = 1, 9 do
+		if term_wins[t] and vim.api.nvim_win_is_valid(term_wins[t]) then
+			any_visible = true
+			break
+		end
+	end
+
+	if not any_visible then
+		if tab_win and vim.api.nvim_win_is_valid(tab_win) then
+			pcall(vim.api.nvim_win_close, tab_win, true)
+			tab_buf, tab_win = nil, nil
+		end
+		return
+	end
+
+	ensure_tabline()
+	local line = render_tab()
+	vim.api.nvim_buf_set_option(tab_buf, "modifiable", true)
+	vim.api.nvim_buf_set_lines(tab_buf, 0, -1, false, { line })
+	vim.api.nvim_buf_set_option(tab_buf, "modifiable", false)
+
+	local active_term_win = nil
+	for t = 1, 9 do
+		if term_wins[t] and vim.api.nvim_win_is_valid(term_wins[t]) then
+			active_term_win = term_wins[t]
+			break
+		end
+	end
+
+	if active_term_win then
+		local term_config = vim.api.nvim_win_get_config(active_term_win)
+		local tabline_width = #line
+
+		vim.api.nvim_win_set_config(tab_win, {
+			relative = "editor",
+			anchor = "NE",
+			width = tabline_width,
+			height = 1,
+			row = term_config.row,
+			col = term_config.col + term_config.width - 2,
+			style = "minimal",
+			border = nil,
+			focusable = false,
+			zindex = 60,
+		})
+	end
+
+	vim.api.nvim_buf_clear_namespace(tab_buf, -1, 0, -1)
+	local col = 0
+	for t = 1, 9 do
+		if term_bufs[t] and vim.api.nvim_buf_is_valid(term_bufs[t]) then
+			local text = string.format("[%d]", t)
+			local len = #text
+			local hl = (t == active_tag) and opts.tabline_hl_cur or opts.tabline_hl_other
+			vim.api.nvim_buf_add_highlight(tab_buf, -1, hl, 0, col, col + len)
+			col = col + len + 1 
+		end
+	end
+end
+
+function M.next_term()
+	local tags = {}
+	for t = 1, 9 do
+		if term_bufs[t] and vim.api.nvim_buf_is_valid(term_bufs[t]) then
+			table.insert(tags, t)
+		end
+	end
+	if #tags == 0 then
+		return
+	end
+
+	local cur_buf = vim.api.nvim_get_current_buf()
+	local cur_idx = 1
+	for i, t in ipairs(tags) do
+		if term_bufs[t] == cur_buf then
+			cur_idx = i
+			break
+		end
+	end
+
+	local next_tag = tags[(cur_idx % #tags) + 1]
+	M.toggle_float_term(next_tag, false, 0, "")
+end
+
+function M.prev_term()
+	local tags = {}
+	for t = 1, 9 do
+		if term_bufs[t] and vim.api.nvim_buf_is_valid(term_bufs[t]) then
+			table.insert(tags, t)
+		end
+	end
+	if #tags == 0 then
+		return
+	end
+
+	local cur_buf = vim.api.nvim_get_current_buf()
+	local cur_idx = 1
+	for i, t in ipairs(tags) do
+		if term_bufs[t] == cur_buf then
+			cur_idx = i
+			break
+		end
+	end
+
+	local prev_tag = tags[((cur_idx - 2) % #tags) + 1]
+	M.toggle_float_term(prev_tag, false, 0, "")
 end
 
 return M
