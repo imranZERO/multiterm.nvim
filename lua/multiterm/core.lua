@@ -143,6 +143,7 @@ function M.toggle_float_term(tag, no_close, tmode, cmd)
 		vim.api.nvim_win_set_var(term_wins[tag], "_multiterm_term_tag", tag)
 
 		M.update_tab(tag)
+        vim.cmd("startinsert")
 
 		vim.api.nvim_create_autocmd("WinLeave", {
 			buffer = term_bufs[tag],
