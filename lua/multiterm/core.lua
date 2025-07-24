@@ -27,6 +27,11 @@ local default_opts = {
 	show_tab = true,
 	tabline_hl_cur = "PmenuSel", -- highlight group for active tag
 	tabline_hl_other = "Pmenu", -- for inactive
+	keymaps = {
+		next = { "<C-Right>", "<C-l>" },
+		prev = { "<C-Left>", "<C-h>" },
+		use_ctrl = true,
+	},
 }
 
 local opts = {}
@@ -146,38 +151,32 @@ function M.toggle_float_term(tag, no_close, tmode, cmd)
 		vim.cmd("startinsert")
 
 		local buf = term_bufs[tag]
+		local modes = { "n", "t", "i", "v" }
+		local map_opts = { silent = true, buffer = buf }
 
-		-- next / prev tabs
-		vim.keymap.set({ "n", "t", "i", "v" }, "<C-h>", M.prev_term, {
-			silent = true,
-			buffer = buf,
-		})
-		vim.keymap.set({ "n", "t", "i", "v" }, "<C-l>", M.next_term, {
-			silent = true,
-			buffer = buf,
-		})
-
-		-- ctrl numbers to toggle terminals
-		if opts.keymaps and opts.keymaps.use_ctrl_numbers then
-			for num = 1, 9 do
-				vim.keymap.set({ "n", "t", "i", "v" }, "<C-" .. num .. ">", function()
-					M.toggle_float_term(num, false, 0, "")
-				end, { silent = true, buffer = buf })
+		-- prev terminal 
+		if opts.keymaps and opts.keymaps.prev then
+			local prevs = type(opts.keymaps.prev) == "table" and opts.keymaps.prev or { opts.keymaps.prev }
+			for _, key in ipairs(prevs) do
+				vim.keymap.set(modes, key, M.prev_term, map_opts)
 			end
 		end
 
-		-- custom keymaps for next/prev
+		-- next terminal 
 		if opts.keymaps and opts.keymaps.next then
-			vim.keymap.set({ "n", "t", "i", "v" }, opts.keymaps.next, M.next_term, {
-				silent = true,
-				buffer = buf,
-			})
+			local nexts = type(opts.keymaps.next) == "table" and opts.keymaps.next or { opts.keymaps.next }
+			for _, key in ipairs(nexts) do
+				vim.keymap.set(modes, key, M.next_term, map_opts)
+			end
 		end
-		if opts.keymaps and opts.keymaps.prev then
-			vim.keymap.set({ "n", "t", "i", "v" }, opts.keymaps.prev, M.prev_term, {
-				silent = true,
-				buffer = buf,
-			})
+
+		-- Ctrl numbers to jump straight to it
+		if opts.keymaps and opts.keymaps.use_ctrl then
+			for num = 1, 9 do
+				vim.keymap.set(modes, "<C-" .. num .. ">", function()
+					M.toggle_float_term(num, false, 0, "")
+				end, map_opts)
+			end
 		end
 
 		vim.api.nvim_create_autocmd("WinLeave", {

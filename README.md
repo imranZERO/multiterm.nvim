@@ -125,6 +125,11 @@ require("multiterm").setup({
 	show_tab = true,
 	tabline_hl_cur = "PmenuSel", 
 	tabline_hl_other = "Pmenu", 
+	keymaps = {
+		next = { "<C-Right>", "<C-l>" },
+		prev = { "<C-Left>", "<C-h>" },
+		use_ctrl = true,
+	},
 )}
 ```
 
