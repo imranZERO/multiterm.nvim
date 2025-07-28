@@ -43,7 +43,7 @@ If you use `lazy.nvim` as your plugin manager:
 
 ## Usage
 
-If you do not have any floating terminal instance, run `:Multiterm [cmd]` will create a floating terminal with tag `1`. It is not suggested to run a non-interactive `cmd` as the terminal session will end and get destroyed as soon as `cmd` finishes if run `:Multiterm` without `!`.
+If you do not have any floating terminal instance, running `:Multiterm [cmd]` will create a floating terminal with tag `1`. It is not suggested to run a non-interactive `cmd` as the terminal session will end and get destroyed as soon as `cmd` finishes if run `:Multiterm` without `!`.
 
 If your cursor is in a floating terminal window, run `:Multiterm` will close that window and put the terminal session into background. Otherwise the **most recently used** floating terminal instance will be activated.
 
@@ -54,7 +54,7 @@ If your tag `3` floating terminal is in the background, run `:3Multiterm` will p
 
 ## Commands & Mappings
 
-A single command is provided:
+A single primary command is provided:
 
 ```vim
 :[count]Multiterm[!] [cmd]
