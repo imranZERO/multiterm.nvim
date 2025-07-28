@@ -123,8 +123,8 @@ require("multiterm").setup({
     backdrop_transparency = 60,
     fullscreen = false,
 	show_tab = true,
-	tabline_hl_cur = "PmenuSel", 
-	tabline_hl_other = "Pmenu", 
+	tabline_hl_active = "PmenuSel", 
+	tabline_hl_inactive = "Pmenu", 
 	keymaps = {
 		next = { "<C-Right>", "<C-l>" },
 		prev = { "<C-Left>", "<C-h>" },

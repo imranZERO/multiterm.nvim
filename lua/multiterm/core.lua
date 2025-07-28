@@ -25,8 +25,8 @@ local default_opts = {
 	backdrop_transparency = 60,
 	fullscreen = false,
 	show_tab = true,
-	tabline_hl_cur = "PmenuSel", -- highlight group for active tag
-	tabline_hl_other = "Pmenu", -- for inactive
+	tabline_hl_active = "PmenuSel",
+	tabline_hl_inactive = "Pmenu",
 	keymaps = {
 		next = { "<C-Right>", "<C-l>" },
 		prev = { "<C-Left>", "<C-h>" },
@@ -547,7 +547,7 @@ function M.update_tab(active_tag)
 		if term_bufs[t] and vim.api.nvim_buf_is_valid(term_bufs[t]) then
 			local text = string.format("[%d]", t)
 			local len = #text
-			local hl = (t == active_tag) and opts.tabline_hl_cur or opts.tabline_hl_other
+			local hl = (t == active_tag) and opts.tabline_hl_active or opts.tabline_hl_inactive
 			vim.api.nvim_buf_add_highlight(tab_buf, -1, hl, 0, col, col + len)
 			col = col + len + 1
 		end
