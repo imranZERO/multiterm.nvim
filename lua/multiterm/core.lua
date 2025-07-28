@@ -290,7 +290,7 @@ function M.list_terminals()
 		if term_bufs[tag] and vim.api.nvim_buf_is_valid(term_bufs[tag]) then
 			vim.api.nvim_win_close(win, true)
 			if not term_wins[tag] or not vim.api.nvim_win_is_valid(term_wins[tag]) then
-				M.toggle_float_term(tag, false, term_tmodes[tag] or 0)
+				M.toggle_float_term(tag, true, term_tmodes[tag] or 0, "")
 			else
 				vim.api.nvim_set_current_win(term_wins[tag])
 				if term_tmodes[tag] == 1 and vim.api.nvim_get_mode().mode ~= "t" then
