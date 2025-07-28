@@ -154,7 +154,7 @@ function M.toggle_float_term(tag, no_close, tmode, cmd)
 		local modes = { "n", "t", "i", "v" }
 		local map_opts = { silent = true, buffer = buf }
 
-		-- prev terminal 
+		-- prev terminal
 		if opts.keymaps and opts.keymaps.prev then
 			local prevs = type(opts.keymaps.prev) == "table" and opts.keymaps.prev or { opts.keymaps.prev }
 			for _, key in ipairs(prevs) do
@@ -162,7 +162,7 @@ function M.toggle_float_term(tag, no_close, tmode, cmd)
 			end
 		end
 
-		-- next terminal 
+		-- next terminal
 		if opts.keymaps and opts.keymaps.next then
 			local nexts = type(opts.keymaps.next) == "table" and opts.keymaps.next or { opts.keymaps.next }
 			for _, key in ipairs(nexts) do
@@ -469,7 +469,7 @@ local function ensure_tabline()
 	vim.api.nvim_buf_set_option(tab_buf, "bufhidden", "wipe")
 
 	local term_config = vim.api.nvim_win_get_config(active_term_win)
-	local line = render_tab(0)
+	local line = render_tab()
 	local tabline_width = #line
 
 	tab_win = vim.api.nvim_open_win(tab_buf, false, {
