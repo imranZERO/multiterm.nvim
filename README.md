@@ -29,16 +29,28 @@ If you use `lazy.nvim` as your plugin manager:
 {
     "imranzero/multiterm.nvim",
     event = "VeryLazy",
-    config = function()
-        require("multiterm").setup({
-            -- Recommended keymaps:
-            vim.keymap.set({ "n", "v", "i", "t" }, "<F12>", "<Plug>(Multiterm)"),
-            vim.keymap.set("n", "<leader><F12>", "<Plug>(MultitermList)"),
+    opts = {
+        -- Recommended keymaps:
+        keymaps = {
+            toggle = "<F12>",
+            list = "<leader><F12>",
+        },
     
-            -- Add configuration options here if needed
-        })
-    end
+        -- Add configuration options here if needed
+    },
 }
+```
+
+For other plugin managers, you can use the `require()` syntax to add keymaps and other configuration options:
+
+```lua
+require("multiterm").setup({
+    -- Recommended keymaps:
+    vim.keymap.set({ "n", "v", "i", "t" }, "<F12>", "<Plug>(Multiterm)"),
+    vim.keymap.set("n", "<leader><F12>", "<Plug>(MultitermList)"),
+
+    -- Add configuration options here if needed
+})
 ```
 
 ## Usage
@@ -84,7 +96,7 @@ Additional commands:
 
 * Opens a popup list of active terminal instances. Use `<Enter>` to open a selected terminal, and press `d` to delete it directly from the list.
 
-Mappings are provided to smooth the operation of toggling floating terminals and are the **SUGGESTED** way to use instead of the command. Using these mappings are just like run `:Multiterm` without any additional argument.
+Mappings are provided to smooth the operation of toggling floating terminals and are the **SUGGESTED** way to use instead of the command. Using these mappings are just like running `:Multiterm` without any additional argument.
 
 ```lua
 -- Map <F12> to toggle the selected terminal window
@@ -92,6 +104,17 @@ vim.keymap.set({ "n", "v", "i", "t" }, "<F12>", "<Plug>(Multiterm)"),
 
 -- Map <leader><F12> to open the pop-up list of the active terminal windows
 vim.keymap.set("n", "<leader><F12>", "<Plug>(MultitermList)"),
+```
+
+These keymaps can also be set with `opts` table if you use `lazy.nvim` as your plugin manager:
+
+```lua
+    opts = {
+        keymaps = {
+            toggle = "<F12>",
+            list = "<leader><F12>",
+        },
+    },
 ```
 
 Now you could press `<F12>` to toggle the tag `1` floating terminal instance or close the current active floating terminal window that your cursor is in. And press `3<F12>` to activate the tag `3` instance, etc.
@@ -122,14 +145,14 @@ require("multiterm").setup({
     backdrop_bg = 'Black',
     backdrop_transparency = 60,
     fullscreen = false,
-	show_tab = true,
-	tabline_hl_active = "PmenuSel", 
-	tabline_hl_inactive = "Pmenu", 
-	keymaps = {
-		next = { "<C-Right>", "<C-l>" },
-		prev = { "<C-Left>", "<C-h>" },
-		use_ctrl = true,
-	},
+    show_tab = true,
+    tabline_hl_active = "PmenuSel", 
+    tabline_hl_inactive = "Pmenu", 
+    term_keys = {
+        next = { "<C-Right>", "<C-l>" },
+        prev = { "<C-Left>", "<C-h>" },
+        use_ctrl = true,
+    },
 )}
 ```
 

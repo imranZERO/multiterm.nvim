@@ -6,7 +6,12 @@ vim.g.loaded_multiterm = 1
 local core = require("multiterm.core")
 local M = {}
 
+local initialized = false
+
 function M.setup(user_opts)
+	if initialized then return end
+	initialized = true
+
 	core.setup(user_opts or {})
 
 	-- Main :Multiterm command
@@ -35,7 +40,7 @@ function M.setup(user_opts)
 		end,
 	})
 
-	-- Keymaps for toggle
+	-- Define core keymaps
 	vim.keymap.set({ "n", "v" }, "<Plug>(Multiterm)", function()
 		M.toggle_float_term(vim.v.count, false, 0, "")
 	end, { silent = true })
@@ -51,10 +56,21 @@ function M.setup(user_opts)
 		'<C-\\><C-n>:lua require("multiterm").toggle_float_term(vim.v.count, false, 1, "")<CR>',
 		{ silent = true }
 	)
-
-	-- List. Press d to delete
 	vim.keymap.set("n", "<Plug>(MultitermList)", require("multiterm.core").list_terminals)
+
+	-- Apply user-defined keymaps
+	if user_opts and user_opts.keymaps then
+		if user_opts.keymaps.toggle then
+			vim.keymap.set({ "n", "v", "i", "t" }, user_opts.keymaps.toggle, "<Plug>(Multiterm)",
+				{ silent = true, desc = "Toggle Multiterm" })
+		end
+		if user_opts.keymaps.list then
+			vim.keymap.set("n", user_opts.keymaps.list, "<Plug>(MultitermList)",
+				{ silent = true, desc = "List Multiterm Buffers" })
+		end
+	end
 end
 
 M.toggle_float_term = core.toggle_float_term
+
 return M

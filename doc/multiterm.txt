@@ -77,7 +77,7 @@ windows with <F12>:
         vim.keymap.set({ "n", "v", "i", "t" }, "<F12>", "<Plug>(Multiterm)"),
         vim.keymap.set("n", "<leader><F12>", "<Plug>(MultitermList)"),
     })
-
+<
 The first mapping here sets up the |Multiterm| mapping for normal, visual,
 insert, terminal modes. And the second mapping is for opening the pop-up list
 for all active terminals.
@@ -117,17 +117,32 @@ You can configure multiterm with Lua via require("multiterm").setup(opts).
         backdrop_bg = 'Black',
         backdrop_transparency = 60,
         fullscreen = false,
-	show_tab = true,
-	tabline_hl_active = "PmenuSel",
-	tabline_hl_inactive = "Pmenu",
-	keymaps = {
-		next = { "<C-Right>", "<C-l>" },
-		prev = { "<C-Left>", "<C-h>" },
-		use_ctrl = true,
-	},
-
-        -- any keymaps you want
+        show_tab = true,
+        tabline_hl_active = "PmenuSel",
+        tabline_hl_inactive = "Pmenu",
+        term_keys = {
+            next = { "<C-Right>", "<C-l>" },
+            prev = { "<C-Left>", "<C-h>" },
+            use_ctrl = true,
+        },
     )}
+<
+If you are using `lazy.nvim` as your plugin manager, you can use the `opts`
+table to add keymaps and configuration options:
+>
+    {
+        "imranzero/multiterm.nvim",
+        event = "VeryLazy",
+        opts = {
+            -- Recommended keymaps:
+            keymaps = {
+                toggle = "<F12>",
+                list = "<leader><F12>",
+            },
+
+            -- Add configuration options here if needed
+        },
+    },
 <
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:

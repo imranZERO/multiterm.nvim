@@ -27,7 +27,7 @@ local default_opts = {
 	show_tab = true,
 	tabline_hl_active = "PmenuSel",
 	tabline_hl_inactive = "Pmenu",
-	keymaps = {
+	term_keys = {
 		next = { "<C-Right>", "<C-l>" },
 		prev = { "<C-Left>", "<C-h>" },
 		use_ctrl = true,
@@ -155,23 +155,23 @@ function M.toggle_float_term(tag, no_close, tmode, cmd)
 		local map_opts = { silent = true, buffer = buf }
 
 		-- prev terminal
-		if opts.keymaps and opts.keymaps.prev then
-			local prevs = type(opts.keymaps.prev) == "table" and opts.keymaps.prev or { opts.keymaps.prev }
+		if opts.term_keys and opts.term_keys.prev then
+			local prevs = type(opts.term_keys.prev) == "table" and opts.term_keys.prev or { opts.term_keys.prev }
 			for _, key in ipairs(prevs) do
 				vim.keymap.set(modes, key, M.prev_term, map_opts)
 			end
 		end
 
 		-- next terminal
-		if opts.keymaps and opts.keymaps.next then
-			local nexts = type(opts.keymaps.next) == "table" and opts.keymaps.next or { opts.keymaps.next }
+		if opts.term_keys and opts.term_keys.next then
+			local nexts = type(opts.term_keys.next) == "table" and opts.term_keys.next or { opts.term_keys.next }
 			for _, key in ipairs(nexts) do
 				vim.keymap.set(modes, key, M.next_term, map_opts)
 			end
 		end
 
 		-- Ctrl numbers to jump straight to it
-		if opts.keymaps and opts.keymaps.use_ctrl then
+		if opts.term_keys and opts.term_keys.use_ctrl then
 			for num = 1, 9 do
 				vim.keymap.set(modes, "<C-" .. num .. ">", function()
 					M.toggle_float_term(num, false, 0, "")
