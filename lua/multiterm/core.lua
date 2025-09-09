@@ -411,25 +411,24 @@ function M._do_kill(tag)
 	term_buf_active_counts[tag] = 0
 end
 
---- kill the terminal buffer for the current buffer
-function M.kill_current()
-	local cur = vim.api.nvim_get_current_buf()
-	for tag, buf in pairs(term_bufs) do
-		if buf == cur then
-			M._do_kill(tag)
+-- Kill terminal (by tag or current if no arg)
+function M.kill(tag)
+	if tag then
+		if not term_bufs[tag] then
+			vim.notify("No such terminal: " .. tostring(tag), vim.log.levels.ERROR)
 			return
 		end
+		M._do_kill(tag)
+	else
+		local cur = vim.api.nvim_get_current_buf()
+		for t, buf in pairs(term_bufs) do
+			if buf == cur then
+				M._do_kill(t)
+				return
+			end
+		end
+		vim.notify("Not in a Multiterm buffer", vim.log.levels.WARN)
 	end
-	vim.notify("Not in a Multiterm buffer", vim.log.levels.WARN)
-end
-
---- kill the terminal buffer by tag
-function M.kill(tag)
-	if not (tag and term_bufs[tag]) then
-		vim.notify("No such terminal: " .. tostring(tag), vim.log.levels.ERROR)
-		return
-	end
-	M._do_kill(tag)
 end
 
 -- Render the tab bar

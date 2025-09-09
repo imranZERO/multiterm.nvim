@@ -24,17 +24,12 @@ function M.setup(user_opts)
 		complete = "shellcmd",
 	})
 
-	-- Kill current terminal
-	vim.api.nvim_create_user_command("MultitermKillCurrent", function()
-		require("multiterm.core").kill_current()
-	end, { nargs = 0 })
-
-	-- Kill by tag
+	-- Kill terminal (by tag or current if no arg)
 	vim.api.nvim_create_user_command("MultitermKill", function(cmd_opts)
 		local tag = tonumber(cmd_opts.args)
 		require("multiterm.core").kill(tag)
 	end, {
-		nargs = 1,
+		nargs = "?",
 		complete = function()
 			return { "1", "2", "3", "4", "5", "6", "7", "8", "9" }
 		end,

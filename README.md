@@ -82,13 +82,7 @@ Additional commands:
 :MultitermKill [id]
 ```
 
-* Kills the terminal session and removes the buffer with the given tag `[id]`.
-
-```vim
-:MultitermKillCurrent
-```
-
-* Kills and removes the currently active terminal session and buffer.
+* Kills the terminal session and removes the buffer with the given tag `[id]`. If ran with no argument, it kills and removes the currently active terminal session and buffer.
 
 ```vim
 :MultitermList

@@ -2,7 +2,7 @@
 
 Author:     Imran H. <imran.leave@gmail.com>
 Source:     https://github.com/imranzero/multiterm.nvim
-Version:    0.1.0
+Version:    0.2.0
 
 ==============================================================================
 Contents                                                  *multiterm-contents*
@@ -57,6 +57,11 @@ zero exit code.
 
 [cmd] is the optional command to run. if not specified, the current 'shell'
 option value will be used.
+
+:MultitermKill [id]                                           *:MultitermKill*
+Kills the terminal session and removes the buffer with the given tag `[id]`.
+If ran with no argument, it kills and removes the currently active terminal
+session and buffer.
 
 <Plug>(Multiterm)                                          *<Plug>(Multiterm)*
 |Multiterm| provides several mappings for you. it is suggested to use them
