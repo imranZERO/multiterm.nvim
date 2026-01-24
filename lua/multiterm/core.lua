@@ -560,7 +560,7 @@ function M.next_term()
 			table.insert(tags, t)
 		end
 	end
-	if #tags == 0 then
+	if #tags <= 1 then
 		return
 	end
 
@@ -584,7 +584,7 @@ function M.prev_term()
 			table.insert(tags, t)
 		end
 	end
-	if #tags == 0 then
+	if #tags <= 1 then
 		return
 	end
 
