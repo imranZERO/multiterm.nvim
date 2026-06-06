@@ -345,8 +345,8 @@ function M.list_terminals()
 		end
 	end, { buffer = buf, silent = true, nowait = true })
 
-	for _, key in ipairs({ "<Up>", "k", "<Down>", "j" }) do
-		vim.api.nvim_buf_set_keymap(buf, "n", key, ":normal! " .. key .. "<CR>", { silent = true })
+	for _, map in ipairs({ { "j", "j" }, { "<Down>", "j" }, { "k", "k" }, { "<Up>", "k" } }) do
+		vim.keymap.set("n", map[1], map[2], { buffer = buf, silent = true })
 	end
 
 	vim.keymap.set("n", "<Esc>", function()
