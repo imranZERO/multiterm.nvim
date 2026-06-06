@@ -45,7 +45,6 @@ local term_wins = {}
 local term_last_wins = {}
 local term_tmodes = {}
 local backdrop_wins = {}
-local tag_wins = {}
 
 for i = 0, 9 do
 	term_buf_active_counts[i] = 0
@@ -389,9 +388,6 @@ function M._do_kill(tag)
 	if term_wins[tag] and vim.api.nvim_win_is_valid(term_wins[tag]) then
 		vim.api.nvim_win_close(term_wins[tag], true)
 	end
-	if tag_wins[tag] and vim.api.nvim_win_is_valid(tag_wins[tag]) then
-		vim.api.nvim_win_close(tag_wins[tag], true)
-	end
 	if backdrop_wins[tag] and vim.api.nvim_win_is_valid(backdrop_wins[tag]) then
 		vim.api.nvim_win_close(backdrop_wins[tag], true)
 	end
@@ -405,7 +401,6 @@ function M._do_kill(tag)
 	end
 	term_bufs[tag] = nil
 	term_wins[tag] = nil
-	tag_wins[tag] = nil
 	backdrop_wins[tag] = nil
 	term_tmodes[tag] = nil
 	term_buf_active_counts[tag] = 0
