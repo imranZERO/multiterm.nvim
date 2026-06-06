@@ -24,6 +24,10 @@ function M.setup(user_opts)
 		complete = "shellcmd",
 	})
 
+	vim.api.nvim_create_user_command("MultitermList", function()
+		require("multiterm.core").list_terminals()
+	end, {})
+
 	-- Kill terminal (by tag or current if no arg)
 	vim.api.nvim_create_user_command("MultitermKill", function(cmd_opts)
 		local tag = tonumber(cmd_opts.args)
