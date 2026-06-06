@@ -134,7 +134,6 @@ require("multiterm").setup({
     border = 'rounded',
     term_hl = 'Normal',
     border_hl = 'FloatBorder',
-    show_term_tag = true,
     show_backdrop = true,
     backdrop_bg = 'Black',
     backdrop_transparency = 60,
