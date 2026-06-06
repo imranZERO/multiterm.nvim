@@ -456,7 +456,8 @@ local function ensure_tabline()
 		return
 	end
 
-	if tab_buf and vim.api.nvim_buf_is_valid(tab_buf) then
+	if tab_buf and vim.api.nvim_buf_is_valid(tab_buf)
+		and tab_win and vim.api.nvim_win_is_valid(tab_win) then
 		return
 	end
 
