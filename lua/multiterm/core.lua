@@ -90,9 +90,9 @@ local function create_backdrop(tag)
 	}
 	local backdrop_win = vim.api.nvim_open_win(backdrop_buf, false, backdrop_opts)
 	vim.api.nvim_set_hl(0, "MultitermBackdrop", { bg = opts.backdrop_bg })
-	vim.api.nvim_win_set_option(backdrop_win, "winhighlight", "Normal:MultitermBackdrop")
-	vim.api.nvim_win_set_option(backdrop_win, "winblend", opts.backdrop_transparency)
-	vim.api.nvim_buf_set_option(backdrop_buf, "bufhidden", "wipe")
+	vim.api.nvim_set_option_value("winhighlight", "Normal:MultitermBackdrop", { win = backdrop_win })
+	vim.api.nvim_set_option_value("winblend", opts.backdrop_transparency, { win = backdrop_win })
+	vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = backdrop_buf })
 	backdrop_wins[tag] = backdrop_win
 	return backdrop_buf, backdrop_win
 end
@@ -143,7 +143,7 @@ function M.toggle_float_term(tag, no_close, tmode, cmd)
 		end
 
 		term_wins[tag] = vim.api.nvim_open_win(term_bufs[tag], true, win_opts)
-		vim.api.nvim_win_set_option(term_wins[tag], "winhighlight", "NormalFloat:" .. opts.term_hl)
+		vim.api.nvim_set_option_value("winhighlight", "NormalFloat:" .. opts.term_hl, { win = term_wins[tag] })
 		vim.api.nvim_win_set_var(term_wins[tag], "_multiterm_term_tag", tag)
 
 		M.update_tab(tag)
@@ -252,8 +252,8 @@ function M.list_terminals()
 	-- Create a scratch buffer for the popup
 	local buf = vim.api.nvim_create_buf(false, true)
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, terms)
-	vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
-	vim.api.nvim_buf_set_option(buf, "modifiable", false)
+	vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
+	vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
 
 	-- Calculate window size
 	local unpack_ = table.unpack or rawget(_G, "unpack") -- Lua 5.2+ or fallback to 5.1
@@ -277,13 +277,9 @@ function M.list_terminals()
 	})
 
 	-- Set window options
-	vim.api.nvim_win_set_option(
-		win,
-		"winhighlight",
-		"NormalFloat:" .. opts.term_hl .. ",FloatBorder:" .. opts.border_hl
-	)
-	vim.api.nvim_win_set_option(win, "winblend", 0)
-	vim.api.nvim_win_set_option(win, "cursorline", true)
+	vim.api.nvim_set_option_value("winhighlight", "NormalFloat:" .. opts.term_hl .. ",FloatBorder:" .. opts.border_hl, { win = win })
+	vim.api.nvim_set_option_value("winblend", 0, { win = win })
+	vim.api.nvim_set_option_value("cursorline", true, { win = win })
 
 	local function select_terminal(tag)
 		if term_bufs[tag] and vim.api.nvim_buf_is_valid(term_bufs[tag]) then
@@ -333,9 +329,9 @@ function M.list_terminals()
 			end
 		end
 
-		vim.api.nvim_buf_set_option(buf, "modifiable", true)
+		vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
 		vim.api.nvim_buf_set_lines(buf, 0, -1, false, new)
-		vim.api.nvim_buf_set_option(buf, "modifiable", false)
+		vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
 
 		-- keep the cursor on the same line
 		local cur = vim.api.nvim_win_get_cursor(win)[1]
@@ -462,7 +458,7 @@ local function ensure_tabline()
 	end
 
 	tab_buf = vim.api.nvim_create_buf(false, true)
-	vim.api.nvim_buf_set_option(tab_buf, "bufhidden", "wipe")
+	vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = tab_buf })
 
 	local term_config = vim.api.nvim_win_get_config(active_term_win)
 	local line = render_tab()
@@ -481,7 +477,7 @@ local function ensure_tabline()
 		zindex = 60,
 	})
 
-	vim.api.nvim_win_set_option(tab_win, "winhighlight", "Normal:" .. opts.border_hl)
+	vim.api.nvim_set_option_value("winhighlight", "Normal:" .. opts.border_hl, { win = tab_win })
 end
 
 function M.update_tab(active_tag)
@@ -507,9 +503,9 @@ function M.update_tab(active_tag)
 
 	ensure_tabline()
 	local line = render_tab()
-	vim.api.nvim_buf_set_option(tab_buf, "modifiable", true)
+	vim.api.nvim_set_option_value("modifiable", true, { buf = tab_buf })
 	vim.api.nvim_buf_set_lines(tab_buf, 0, -1, false, { line })
-	vim.api.nvim_buf_set_option(tab_buf, "modifiable", false)
+	vim.api.nvim_set_option_value("modifiable", false, { buf = tab_buf })
 
 	local active_term_win = nil
 	for t = 1, 9 do
