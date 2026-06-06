@@ -401,6 +401,7 @@ function M._do_kill(tag)
 	end
 	term_bufs[tag] = nil
 	term_wins[tag] = nil
+	term_last_wins[tag] = nil
 	backdrop_wins[tag] = nil
 	term_tmodes[tag] = nil
 	term_buf_active_counts[tag] = 0
