@@ -202,12 +202,11 @@ function M.toggle_float_term(tag, no_close, tmode, cmd)
 		if need_termopen then
 			vim.fn.termopen((cmd ~= "" and cmd) or vim.o.shell, {
 				on_exit = function(_, exit_code)
-					-- only auto close on success (0), and only if user didn’t add “!”
+					-- only auto close on success (0), and only if user didn’t add "!"
 					if exit_code == 0 and not no_close then
-						if term_bufs[tag] and vim.api.nvim_buf_is_valid(term_bufs[tag]) then
-							vim.api.nvim_buf_delete(term_bufs[tag], { force = true })
-							term_bufs[tag] = nil
-						end
+						vim.schedule(function()
+							M._do_kill(tag)
+						end)
 					end
 				end,
 			})
