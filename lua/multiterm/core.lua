@@ -297,19 +297,16 @@ function M.list_terminals()
 		end
 	end
 
-	vim.api.nvim_buf_set_keymap(buf, "n", "<CR>", "", {
-		callback = function()
-			local line = vim.api.nvim_get_current_line()
-			local tag = tonumber(line:match("Term (%d+)"))
-			if tag then
-				select_terminal(tag)
-			else
-				vim.api.nvim_win_close(win, true)
-				vim.notify("Invalid terminal selection.", vim.log.levels.WARN)
-			end
-		end,
-		silent = true,
-	})
+	vim.keymap.set("n", "<CR>", function()
+		local line = vim.api.nvim_get_current_line()
+		local tag = tonumber(line:match("Term (%d+)"))
+		if tag then
+			select_terminal(tag)
+		else
+			vim.api.nvim_win_close(win, true)
+			vim.notify("Invalid terminal selection.", vim.log.levels.WARN)
+		end
+	end, { buffer = buf, silent = true })
 
 	-- delete terminal by pressing d
 	vim.keymap.set("n", "d", function()
@@ -352,16 +349,12 @@ function M.list_terminals()
 		vim.api.nvim_buf_set_keymap(buf, "n", key, ":normal! " .. key .. "<CR>", { silent = true })
 	end
 
-	vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", "", {
-		callback = function()
-			vim.api.nvim_win_close(win, true)
-		end,
-	})
-	vim.api.nvim_buf_set_keymap(buf, "n", "q", "", {
-		callback = function()
-			vim.api.nvim_win_close(win, true)
-		end,
-	})
+	vim.keymap.set("n", "<Esc>", function()
+		vim.api.nvim_win_close(win, true)
+	end, { buffer = buf })
+	vim.keymap.set("n", "q", function()
+		vim.api.nvim_win_close(win, true)
+	end, { buffer = buf })
 
 	-- Auto-close when leaving the buffer
 	vim.api.nvim_create_autocmd("BufLeave", {
